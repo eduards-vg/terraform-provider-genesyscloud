@@ -119,12 +119,13 @@ func getAllTaskManagementWorktypeFn(ctx context.Context, p *TaskManagementWorkty
 
 	var allWorktypes []platformclientv2.Worktype
 	pageSize := 200
-	after := ""
+	// Leave 'after' unset on the first page; the API rejects an empty string
+	var after *string
 	var response *platformclientv2.APIResponse
 	for {
 		queryReq := &platformclientv2.Worktypequeryrequest{
 			PageSize: &pageSize,
-			After:    &after,
+			After:    after,
 		}
 		worktypes, resp, err := p.taskManagementApi.PostTaskmanagementWorktypesQuery(*queryReq)
 		response = resp
@@ -137,7 +138,7 @@ func getAllTaskManagementWorktypeFn(ctx context.Context, p *TaskManagementWorkty
 		if worktypes.After == nil || *worktypes.After == "" {
 			break
 		}
-		after = *worktypes.After
+		after = worktypes.After
 	}
 	return &allWorktypes, response, nil
 }
